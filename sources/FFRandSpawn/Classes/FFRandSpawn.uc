@@ -1,49 +1,19 @@
-class FFRandSpawn extends KFRandomItemSpawn
-	Config(FFRandSpawn);
+class FFRandSpawn extends KFRandomItemSpawn;
 
-var() config array<string> SpawnItem;
-var array< class<Pickup> > RandClass;
-var array<int> RandWeight;
+var FFRandSpawnCollection RSC;
 
-simulated event  postBeginPlay() {
-	local string str;
-	local int i, index, split, weight;
-	local class<Pickup> itemClass;
+simulated event PostBeginPlay() {
+	local int i;
 	
 // based on a copy from KFRandomItemSpawn
 	if( Level.NetMode!=NM_Client ) {
-		if( SpawnItem.Length > 0 ){
-			RandClass.Length = 0;
-			RandWeight.Length = 0;
-			index = 0;
-			// Log("Processing ini of length"@SpawnItem.Length, 'FFRandSpawn');
-			for( i=0; i<SpawnItem.Length; i++ ) {
-				str = SpawnItem[i];
-				// Log("Processing ini line"@str, 'FFRandSpawn');
-				split = InStr( str, ":" );
-				if( split > 0 ) {
-					weight = int( Left( str, split ) );
-					itemClass = class<Pickup>( DynamicLoadObject( Mid( str, split+1 ), Class'Class' ) );
-					if( itemClass != none ){
-						RandClass[index] = itemClass;
-						RandWeight[index] = weight;
-						WeightTotal += weight;
-						index++;
-					}
-				} else {
-					Log( "Error ecountered while parsing ini file", 'FFRandSpawn' );
-				}
-			}
-			NumClasses = SpawnItem.Length;
-		} else {
-			//Log("NOT processing ini of length"@SpawnItem.Length, 'FFRandSpawn');
-			NumClasses = RandClass.Length;
-		}
+		NumClasses = RSC.GetClassCount();
+		WeightTotal = RSC.GetWeightSum();
 		SetPowerUp();
 	}
 	if ( Level.NetMode != NM_DedicatedServer ) {
 		for ( i=0; i< NumClasses; i++ ){
-			RandClass[i].static.StaticPrecache(Level);
+			RSC.GetClass(i).static.StaticPrecache(Level);
 		}
 	}
 	if ( KFGameType(Level.Game) != none ) {
@@ -61,7 +31,7 @@ function int GetWeightedRandClass(){
 	index = -1;
 	while(sum<rnd){
 		index += 1;
-		sum += RandWeight[index];
+		sum += RSC.GetWeight(index);
 	}
 	return index;
 }
@@ -78,7 +48,7 @@ function TurnOn(){
 function SetPowerUp(){
 	CurrentClass=GetWeightedRandClass();
 	if( CurrentClass >= 0 ){
-		PowerUp = RandClass[CurrentClass];
+		PowerUp = RSC.GetClass(CurrentClass);
 	} else {
 		PowerUp = none;
 	}
@@ -86,6 +56,4 @@ function SetPowerUp(){
 
 defaultproperties
 {
-	RandClass[0]=Class'KFMod.KnifePickup'
-	RandWeight[0]=1
 }
