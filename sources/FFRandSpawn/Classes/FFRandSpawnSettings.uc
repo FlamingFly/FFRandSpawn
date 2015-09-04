@@ -20,10 +20,10 @@ function InitList(){
 		RandWeight.Length = 0;
 		WeightSum = 0;
 		index = 0;
-		// Log("Processing ini of length"@SpawnItem.Length, 'FFRandSpawnSettings');
+		// Log("Processing ini of length"@SpawnItem.Length, self.class.name);
 		for( i=0; i<SpawnItem.Length; i++ ) {
 			str = SpawnItem[i];
-			// Log("Processing ini line"@str, 'FFRandSpawnSettings');
+			// Log("Processing ini line"@str, self.class.name);
 			split = InStr( str, ":" );
 			if( split > 0 ) {
 				weight = int( Left( str, split ) );
@@ -35,11 +35,11 @@ function InitList(){
 					index++;
 				}
 			} else {
-				// Log( "Error ecountered while parsing ini file", 'FFRandSpawnSettings' );
+				// Log( "Error ecountered while parsing ini file", self.class.name );
 			}
 		}
 	} else {
-		// Log("NOT processing ini of length"@SpawnItem.Length, 'FFRandSpawnSettings');
+		// Log("NOT processing ini of length"@SpawnItem.Length, self.class.name);
 	}
 }
 
