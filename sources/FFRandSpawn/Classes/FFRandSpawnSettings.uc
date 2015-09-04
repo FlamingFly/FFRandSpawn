@@ -1,4 +1,4 @@
-class FFRandSpawnCollection extends Object
+class FFRandSpawnSettings extends Object
 	Config(FFRandSpawn);
 
 var() config array<string> SpawnItem;
@@ -20,10 +20,10 @@ function InitList(){
 		RandWeight.Length = 0;
 		WeightSum = 0;
 		index = 0;
-		// Log("Processing ini of length"@SpawnItem.Length, 'FFRandSpawnCollection');
+		// Log("Processing ini of length"@SpawnItem.Length, 'FFRandSpawnSettings');
 		for( i=0; i<SpawnItem.Length; i++ ) {
 			str = SpawnItem[i];
-			// Log("Processing ini line"@str, 'FFRandSpawnCollection');
+			// Log("Processing ini line"@str, 'FFRandSpawnSettings');
 			split = InStr( str, ":" );
 			if( split > 0 ) {
 				weight = int( Left( str, split ) );
@@ -35,11 +35,11 @@ function InitList(){
 					index++;
 				}
 			} else {
-				// Log( "Error ecountered while parsing ini file", 'FFRandSpawnCollection' );
+				// Log( "Error ecountered while parsing ini file", 'FFRandSpawnSettings' );
 			}
 		}
 	} else {
-		// Log("NOT processing ini of length"@SpawnItem.Length, 'FFRandSpawnCollection');
+		// Log("NOT processing ini of length"@SpawnItem.Length, 'FFRandSpawnSettings');
 	}
 }
 

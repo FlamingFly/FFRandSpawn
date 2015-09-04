@@ -1,6 +1,6 @@
 class FFRandSpawn extends KFRandomItemSpawn;
 
-var FFRandSpawnCollection RSC;
+var FFRandSpawnSettings RSC;
 
 simulated event PostBeginPlay() {
 	local int i;

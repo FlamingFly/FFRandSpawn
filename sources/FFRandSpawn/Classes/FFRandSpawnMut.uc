@@ -1,9 +1,9 @@
 class FFRandSpawnMut extends Mutator;
 
-var FFRandSpawnCollection RSC;
+var FFRandSpawnSettings RSC;
 
 simulated event PostBeginPlay(){
-	RSC = New class'FFRandSpawnCollection';
+	RSC = New class'FFRandSpawnSettings';
 }
 
 function bool CheckReplacement(Actor Other, out byte bSuperRelevant){
