@@ -229,7 +229,7 @@ private function AddSpawnerToList( FFRandItemSpawn Spawner, out array<FFRandItem
 }
 
 private function ApplyFakes(){
-	Log("DEBUG: ApplyFakes()", self.class.name);
+	// Log("DEBUG: ApplyFakes()", self.class.name);
 	Game.WeaponPickups.Length = 0;
 	Game.WeaponPickups[0] = FakeItem;
 	Game.AmmoPickups.Length = 0;

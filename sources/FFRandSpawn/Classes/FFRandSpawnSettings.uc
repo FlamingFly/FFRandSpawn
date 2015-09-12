@@ -59,7 +59,7 @@ private function InitList(){
 	ValidateRange(PickupCooldown, PickupCooldownMin, PickupCooldownMax, "PickupCooldown" );
 	ValidateRange(EnsurePickupRatio, 0.0, 1.0, "EnsurePickupRatio" );
 	ValidateRange(EnsureAmmoRatio, 0.0, 1.0, "EnsureAmmoRatio" );
-	ValidateRange(DespawnChanceRatio, 0.0, 1.0, "DespawnChanceRatio" );
+	ValidateRange(DespawnChanceRatio, 0.0, 0.999999, "DespawnChanceRatio" );
 	// validate spawn chances
 	ValidateRange(SpawnChanceBeg, 0.0, 1.0, "SpawnChanceBeg" );
 	ValidateRange(SpawnChanceNorm, 0.0, 1.0, "SpawnChanceNorm" );
@@ -135,18 +135,12 @@ public function SetGameDiff( float diff ){
 	}
 	// calculate SpawnChance
 	if( spawnCh >= 0.0 && spawnCh < 1.0 ){
-		SpawnChance = 1.0 - Exp(Loge(1.0 - spawnCh)*(PickupSpawnInterval / PickupSpawnIntervalMax));
+		SpawnChance = (1.0 - Exp(Loge(1.0 - spawnCh)*(PickupSpawnInterval / PickupSpawnIntervalMax)))/(1 - DespawnChanceRatio);
 	} else {
 		SpawnChance = Fclamp(spawnCh, 0.0, 1.0);
 	}
 	Log("DEBUG: SpawnChance*10^6 = "$(SpawnChance*1000000), self.class.name);
-	// calculate DespawnChance
-	spawnCh = spawnCh*DespawnChanceRatio;
-	if( spawnCh >= 0.0 && spawnCh < 1.0 ){
-		DespawnChance = 1.0 - Exp(Loge(1.0 - spawnCh)*(PickupSpawnInterval / PickupSpawnIntervalMax));
-	} else {
-		DespawnChance = Fclamp(spawnCh, 0.0, 1.0);
-	}
+	DespawnChance = SpawnChance * DespawnChanceRatio;
 	Log("DEBUG: DespawnChance*10^6 = "$(DespawnChance*1000000), self.class.name);
 	
 	bDiffSet = true;
