@@ -41,6 +41,7 @@ set START_DIR=%cd%
 :: prepare build dir name
 set TM=%TIME:~0,8%
 set TM=%TM::=-%
+set TM=%TM: =0%
 set BUILD=%DATE%T%TM%
 
 :: clear workspace
