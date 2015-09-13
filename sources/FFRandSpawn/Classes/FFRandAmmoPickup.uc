@@ -44,10 +44,10 @@ auto state Pickup{
                     DBShotty.AmmoPickedUp();
                 }
                 AnnouncePickup(Pawn(Other));
-				if ( KFGameType(Level.Game) != none ){
-					KFGameType(Level.Game).AmmoPickedUp(self);
-				}
-				Destroy(); // because I don't want it sticking around
+				// if ( KFGameType(Level.Game) != none ){
+					// KFGameType(Level.Game).AmmoPickedUp(self);
+				// }
+				Destroy(); // because we don't want it sticking around
 			}
 		}
 	}
@@ -74,9 +74,10 @@ event Landed(Vector HitNormal){
 
 defaultproperties
 {
-	bCollideActors=true
-    bCollideWorld=true
-	bHidden=false
 	DrawType=DT_StaticMesh
+	StaticMesh=StaticMesh'kf_generic_sm.pickups.Metal_Ammo_Box'
+	bCollideActors=True
+    bCollideWorld=True
+	bHidden=False
 	RespawnTime=0.000000
 }

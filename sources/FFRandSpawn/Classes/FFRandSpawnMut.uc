@@ -1,6 +1,6 @@
 class FFRandSpawnMut extends Mutator;
 
-const VERSION = "1.000";
+const VERSION = "1.001";
 
 var private FFRandSpawnSettings Settings;
 var private bool bAmmoSet, bTimerSet, bWaitForSettings;
@@ -54,14 +54,14 @@ public function bool CheckReplacement(Actor Other, out byte bSuperRelevant){
 	}
 	if ( Other.IsA('KFAmmoPickup') ){
 		// Log("DEBUG: Checking AmmoBox actor", self.class.name);
-		if( !bAmmoSet && !Other.IsA('FFRandAmmoPickup') ){ // grab ammobox look
+		if( !bAmmoSet && !Other.IsA('FFRandAmmoPickup') && !Other.IsA('FFRandFakeAmmoSpawn')){ // grab ammobox look
 			// Log("DEBUG: Capturing AmmoBox properties", self.class.name);
 			Settings.SaveAmmoProp(Other);
 			bAmmoSet = true;
 		}
-		if( Other.Owner != none && Other.Owner.class == class'FFRandItemSpawn' ){ // ammobox spawned by FFRandItemSpawn - replace visuals
+		if( Other.class == class'FFRandAmmoPickup' ){
 			// Log("DEBUG: Owner OK, replacing visuals", self.class.name);
-			Settings.ApplyAmmoProp(Other);
+			// Settings.ApplyAmmoProp(Other);
 			return true;
 		} else if( Other.class == class'FFRandFakeAmmoSpawn' ){
 			// Log("DEBUG: FFRandFakeAmmoSpawn OK", self.class.name);
@@ -94,29 +94,30 @@ public function Timer(){
 }
 
 private function RefreshPickups(){
+	// only spawn new pickups when trader is closed and
+	// there are more than MinMonsters left on the map
+	// or there are Zeds left to spawn.
+	// Otherwise nothing new will spawn but despawn
+	// keeps running.
 	local int i;
 	local float chance;
 	local array<FFRandItemSpawn> tmpList;
 
 	Log("DEBUG: RefreshPickups()", self.class.name);
+	// first, pick some Spawners to turn off
+	// this is processed all the time while the match is in progress
+	chance = Settings.GetDespawnChance();
+	// Log("DEBUG: DespawnChance = "$chance, self.class.name);
+	for( i=0; i < ActiveSpawners.Length; i++ ){
+		if( Frand() < chance ){
+			AddSpawnerToList( ActiveSpawners[i], tmpList );
+		}
+	}
+	for( i=0; i < tmpList.Length; i++ ){
+		tmpList[i].TurnOff();
+	}
+	// then pick Spawners to spawn new random items
 	if( !Game.bTradingDoorsOpen && ( Game.NumMonsters > Settings.GetMinMonsters() || Game.TotalMaxMonsters > 0 ) ){
-		// only process pickups trader is closed and there
-		// are more than MinMonsters Zeds left on the map
-		// or there are Zeds left to spawn.
-		// Otherwise nothing new will spawn or despawn
-
-		// first, pick some Spawners to turn off
-		chance = Settings.GetDespawnChance();
-		// Log("DEBUG: DespawnChance = "$chance, self.class.name);
-		for( i=0; i < ActiveSpawners.Length; i++ ){
-			if( Frand() < chance ){
-				AddSpawnerToList( ActiveSpawners[i], tmpList );
-			}
-		}
-		for( i=0; i < tmpList.Length; i++ ){
-			tmpList[i].TurnOff();
-		}
-		// then pick Spawners to spawn new random items
 		chance = Settings.GetSpawnChance();
 		// Log("DEBUG: SpawnChance = "$chance, self.class.name);
 		for( i=0; i < ReadySpawners.Length; i++ ){
@@ -127,9 +128,8 @@ private function RefreshPickups(){
 		for( i=0; i < tmpList.Length; i++ ){
 			tmpList[i].SpawnRandom();
 		}
-	} else {
-		return;
 	}
+	
 }
 
 public function NotifyOnPickupTaken( FFRandItemSpawn Spawner ){
@@ -238,7 +238,8 @@ private function ApplyFakes(){
 
 defaultproperties
 {
-	GroupName="KF_FFRandSpawn"
+	GroupName="KF_FlamingFly"
 	FriendlyName="FF Random Spawn"
 	Description="Configurable (ini) replacement for random item spawns"
+	bAddToServerPackages=True
 }

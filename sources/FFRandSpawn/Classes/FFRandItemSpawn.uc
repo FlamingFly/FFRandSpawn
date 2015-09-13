@@ -10,6 +10,7 @@ var private int MaxSpawnRetry;
 
 simulated public event PostBeginPlay(){
 	local int i;
+	Log("DEBUG: PostBeginPlay()", self.class.name);
 	// for timeimg checks
 	SetTimer(1, true);
 	if ( Level.NetMode != NM_DedicatedServer ) {
@@ -89,25 +90,29 @@ private function SpawnItem( class<Pickup> itemClass, bool force ){
 	if( force && myPickup != none ){
 		myPickup.Destroy();
 	}
-	// try to spawn at the random location and halve it if failed until spawned or ran out of attempts
-	for( i=0; ( myPickup == none && i < MaxSpawnRetry ); i++){
-		myPickUp = Spawn( itemClass, self,, (self.Location + rndPos + (vect(0,0,1) * SpawnHeight)), rndRot);
-		rndPos = rndPos * 0.5;
-	}
-	// if above failed to spawn pickup, then spawn it directly above self
-	if( myPickup == none ){
-		myPickUp = Spawn( itemClass, self,, (self.Location + (vect(0,0,1) * SpawnHeight)), rndRot);
-	}
-	// set the pickup's properties
-	if( myPickUp != none ) {
-		// Log("DEBUG: Spawned", self.class.name);
-		myPickUp.PickUpBase = self;
-		myPickup.RespawnTime = 0;
-		myPickup.SetPhysics(PHYS_Falling);
-		CooldownEndTime = -1;
-		myMut.NotifyOnPickupSpawned( self );
+	if(myPickup == none){
+		// try to spawn at the random location and halve it if failed until spawned or ran out of attempts
+		for( i=0; ( myPickup == none && i < MaxSpawnRetry ); i++){
+			myPickUp = Spawn( itemClass, self,, (self.Location + rndPos + (vect(0,0,1) * SpawnHeight)), rndRot);
+			rndPos = rndPos * 0.5;
+		}
+		// if above failed to spawn pickup, then spawn it directly above self
+		if( myPickup == none ){
+			myPickUp = Spawn( itemClass, self,, (self.Location + (vect(0,0,1) * SpawnHeight)), rndRot);
+		}
+		// set the pickup's properties
+		if( myPickUp != none ) {
+			// Log("DEBUG: Spawned", self.class.name);
+			myPickUp.PickUpBase = self;
+			myPickup.RespawnTime = 0;
+			myPickup.SetPhysics(PHYS_Falling);
+			CooldownEndTime = -1;
+			myMut.NotifyOnPickupSpawned( self );
+		} else {
+			Log("WARNING: Failed to spawn "$itemClass$" on position "$(self.Location + (vect(0,0,1) * SpawnHeight)), self.class.name);
+		}
 	} else {
-		Log("WARNING: Failed to spawn "$itemClass$" on position "$(self.Location + (vect(0,0,1) * SpawnHeight)), self.class.name);
+		Log("WARNING: Not spawning new pickup, already have one.", self.class.name);
 	}
 }
 
@@ -149,9 +154,10 @@ public function SpawnPickup(){}
 
 defaultproperties
 {
-	bIsEnabledNow=true
+	// bAlwaysRelevant=True
 	CooldownEndTime=-1
 	SpawnHeight=50.0
-	RandomPosRange=100.0
+	RandomPosRange=250.0
 	MaxSpawnRetry=10
+	bIsEnabledNow=True
 }

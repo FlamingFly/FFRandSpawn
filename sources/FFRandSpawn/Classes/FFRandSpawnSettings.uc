@@ -23,6 +23,7 @@ var private float AmmoScale;
 var private vector AmmoScale3D;
 
 public event Created (){
+	Log("DEBUG: Created()", self.class.name);
 	bInitDone = false;
 	InitList();
 }
@@ -165,6 +166,7 @@ public function ApplyAmmoProp( Actor Other ){
 	Other.SetDrawScale(AmmoScale);
 	Other.SetDrawScale3D(AmmoScale3D);
 	Other.SetDrawType(DT_StaticMesh);
+	Other.NetUpdateTime = Other.Level.TimeSeconds - 1;
 }
 
 public function float GetCooldown(){
