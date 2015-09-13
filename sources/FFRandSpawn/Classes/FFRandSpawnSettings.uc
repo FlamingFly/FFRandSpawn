@@ -23,7 +23,7 @@ var private float AmmoScale;
 var private vector AmmoScale3D;
 
 public event Created (){
-	Log("DEBUG: Created()", self.class.name);
+	// Log("DEBUG: Created()", self.class.name);
 	bInitDone = false;
 	InitList();
 }
@@ -136,12 +136,13 @@ public function SetGameDiff( float diff ){
 	}
 	// calculate SpawnChance
 	if( spawnCh >= 0.0 && spawnCh < 1.0 ){
-		SpawnChance = (1.0 - Exp(Loge(1.0 - spawnCh)*(PickupSpawnInterval / PickupSpawnIntervalMax)))/(1 - DespawnChanceRatio);
+		DespawnChance = 1.0 - Exp(Loge(1.0 - DespawnChanceRatio*(1.0 - spawnCh))*(PickupSpawnInterval / PickupSpawnIntervalMax));
+		SpawnChance = 1.0 - Exp(Loge(1.0 - spawnCh)*(PickupSpawnInterval / PickupSpawnIntervalMax)) + DespawnChance;
 	} else {
 		SpawnChance = Fclamp(spawnCh, 0.0, 1.0);
+		DespawnChance = 1.0 - SpawnChance;
 	}
 	Log("DEBUG: SpawnChance*10^6 = "$(SpawnChance*1000000), self.class.name);
-	DespawnChance = SpawnChance * DespawnChanceRatio;
 	Log("DEBUG: DespawnChance*10^6 = "$(DespawnChance*1000000), self.class.name);
 	
 	bDiffSet = true;
@@ -166,7 +167,7 @@ public function ApplyAmmoProp( Actor Other ){
 	Other.SetDrawScale(AmmoScale);
 	Other.SetDrawScale3D(AmmoScale3D);
 	Other.SetDrawType(DT_StaticMesh);
-	Other.NetUpdateTime = Other.Level.TimeSeconds - 1;
+	// Other.NetUpdateTime = Other.Level.TimeSeconds - 1;
 }
 
 public function float GetCooldown(){

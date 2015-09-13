@@ -2,7 +2,7 @@ class FFRandItemSpawn extends KFRandomItemSpawn;
 
 var private FFRandSpawnSettings Settings;
 var private FFRandSpawnMut myMut;
-var private bool bDelayedOff;
+var private bool bDelayedOff, bTurningOff;
 var private float RandomPosRange, TurnOffRetryTime, CooldownEndTime;
 var private KFGameType Game;
 var private int MaxSpawnRetry;
@@ -10,8 +10,9 @@ var private int MaxSpawnRetry;
 
 simulated public event PostBeginPlay(){
 	local int i;
-	Log("DEBUG: PostBeginPlay()", self.class.name);
+	// Log("DEBUG: PostBeginPlay()", self.class.name);
 	// for timeimg checks
+	bTurningOff = false;
 	SetTimer(1, true);
 	if ( Level.NetMode != NM_DedicatedServer ) {
 		for ( i=0; i< Settings.GetClassCount(); i++ ){
@@ -25,10 +26,11 @@ public function bool IsAmmo(){
 }
 
 public function bool TurnOff(optional bool force){
-	Log("DEBUG: TurnOff()", self.class.name);
+	// Log("DEBUG: TurnOff()", self.class.name);
 	if( myPickup != none ){
 		if( force || !myPickup.PlayerCanSeeMe() ){
 			// noone can see the pickup (spawner is hidden, so need to check against pickup)
+			bTurningOff = true;
 			myPickup.Destroy();
 			TurnOffRetryTime = 0;
 			return true;
@@ -37,6 +39,19 @@ public function bool TurnOff(optional bool force){
 			bDelayedOff = true;
 			TurnOffRetryTime = Level.TimeSeconds + Settings.GetTurnOffRetryDelay();
 			return false;
+		}
+	}
+}
+
+public function LostChild( Actor lost ){
+	// Log("DEBUG: LostChild()", self.class.name);
+	if( lost == myPickup ){
+		if( bTurningOff ){
+			myMut.NotifyOnTurnOff( self );
+			bTurningOff = False;
+		} else {
+			myMut.NotifyOnPickupTaken( self );
+			CooldownEndTime = Level.TimeSeconds + Settings.GetCooldown();
 		}
 	}
 }
@@ -120,14 +135,6 @@ public function bool CanSpawn(){
 	return ( myPickup == none && Level.TimeSeconds >= CooldownEndTime );
 }
 
-public function LostChild( Actor lost ){
-	// Log("DEBUG: LostChild()", self.class.name);
-	if( lost == myPickup ){
-		myMut.NotifyOnPickupTaken( self );
-		CooldownEndTime = Level.TimeSeconds + Settings.GetCooldown();
-	}
-}
-
 public function Timer(){
 	if( bDelayedOff && Level.TimeSeconds >= TurnOffRetryTime){
 		TurnOff();
@@ -154,7 +161,6 @@ public function SpawnPickup(){}
 
 defaultproperties
 {
-	// bAlwaysRelevant=True
 	CooldownEndTime=-1
 	SpawnHeight=50.0
 	RandomPosRange=250.0

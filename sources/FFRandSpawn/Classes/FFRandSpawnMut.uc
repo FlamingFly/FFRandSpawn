@@ -54,14 +54,14 @@ public function bool CheckReplacement(Actor Other, out byte bSuperRelevant){
 	}
 	if ( Other.IsA('KFAmmoPickup') ){
 		// Log("DEBUG: Checking AmmoBox actor", self.class.name);
-		if( !bAmmoSet && !Other.IsA('FFRandAmmoPickup') && !Other.IsA('FFRandFakeAmmoSpawn')){ // grab ammobox look
+		if( !bAmmoSet && !Other.IsA('FFRandAmmoPickup') && !Other.IsA('FFRandFakeAmmoSpawn')){
 			// Log("DEBUG: Capturing AmmoBox properties", self.class.name);
 			Settings.SaveAmmoProp(Other);
 			bAmmoSet = true;
 		}
 		if( Other.class == class'FFRandAmmoPickup' ){
 			// Log("DEBUG: Owner OK, replacing visuals", self.class.name);
-			// Settings.ApplyAmmoProp(Other);
+			Settings.ApplyAmmoProp(Other);
 			return true;
 		} else if( Other.class == class'FFRandFakeAmmoSpawn' ){
 			// Log("DEBUG: FFRandFakeAmmoSpawn OK", self.class.name);
@@ -103,7 +103,7 @@ private function RefreshPickups(){
 	local float chance;
 	local array<FFRandItemSpawn> tmpList;
 
-	Log("DEBUG: RefreshPickups()", self.class.name);
+	// Log("DEBUG: RefreshPickups()", self.class.name);
 	// first, pick some Spawners to turn off
 	// this is processed all the time while the match is in progress
 	chance = Settings.GetDespawnChance();
@@ -129,7 +129,7 @@ private function RefreshPickups(){
 			tmpList[i].SpawnRandom();
 		}
 	}
-	
+	EnsurePickups();
 }
 
 public function NotifyOnPickupTaken( FFRandItemSpawn Spawner ){
@@ -141,7 +141,7 @@ public function NotifyOnPickupTaken( FFRandItemSpawn Spawner ){
 	}
 	RemoveSpawnerFromList( Spawner, ActiveSpawners );
 	AddSpawnerToList( Spawner, CoolingSpawners );
-	// EnsurePickups();
+	EnsurePickups();
 }
 
 public function NotifyOnPickupSpawned( FFRandItemSpawn Spawner ){
@@ -162,19 +162,31 @@ public function NotifyOnCooldownEnd( FFRandItemSpawn Spawner ){
 	AddSpawnerToList( Spawner, ReadySpawners );
 }
 
+public function NotifyOnTurnOff( FFRandItemSpawn Spawner ){
+	// Log("DEBUG: NotifyOnTurnOff()", self.class.name);
+	if( Spawner.IsAmmo() ){
+		RemoveSpawnerFromList( Spawner, ActiveAmmoSpawners );
+	} else {
+		RemoveSpawnerFromList( Spawner, ActiveItemSpawners );
+	}
+	RemoveSpawnerFromList( Spawner, ActiveSpawners );
+	AddSpawnerToList( Spawner, ReadySpawners );
+	EnsurePickups();
+}
+
 private function EnsurePickups(){
 	local int i, missing;
 	local float calc;
 	local FFRandItemSpawn spawner;
 	
-	Log("DEBUG: EnsurePickups()", self.class.name);
+	// Log("DEBUG: EnsurePickups()", self.class.name);
 	// calculate pickups to fill in the ensured number and spawn new pickups
 	// from ready or cooling spawners if ran out of the first
 	calc = float(AllSpawners.Length) * Settings.GetEnsurePickup() - ActiveSpawners.Length;
-	Log("DEBUG: calc = "$calc, self.class.name);
+	// Log("DEBUG: calc = "$calc, self.class.name);
 	// poor man's Floor();
 	missing = int(calc);
-	Log("DEBUG: missing = "$missing, self.class.name);
+	// Log("DEBUG: missing = "$missing, self.class.name);
 	if( missing > 0 ){
 		for( i=0; i < missing; i++ ){
 			if( ReadySpawners.Length > 0 ){
@@ -189,9 +201,9 @@ private function EnsurePickups(){
 	}
 	// do the same for ammo pickups
 	calc = float(ActiveSpawners.Length) * Settings.GetEnsureAmmo() - ActiveAmmoSpawners.Length;
-	Log("DEBUG: calc = "$calc, self.class.name);
+	// Log("DEBUG: calc = "$calc, self.class.name);
 	missing = int(calc);
-	Log("DEBUG: missing = "$missing, self.class.name);
+	// Log("DEBUG: missing = "$missing, self.class.name);
 	if( missing > 0 ){
 		for( i=0; i < missing; i++ ){
 			if( ActiveItemSpawners.Length > 0 ){

@@ -74,8 +74,6 @@ event Landed(Vector HitNormal){
 
 defaultproperties
 {
-	DrawType=DT_StaticMesh
-	StaticMesh=StaticMesh'kf_generic_sm.pickups.Metal_Ammo_Box'
 	bCollideActors=True
     bCollideWorld=True
 	bHidden=False
