@@ -1,6 +1,6 @@
 class FFRandSpawnMut extends Mutator;
 
-const VERSION = "1.001";
+const VERSION = "1.002";
 
 var private FFRandSpawnSettings Settings;
 var private bool bAmmoSet, bTimerSet, bWaitForSettings;
@@ -116,6 +116,8 @@ private function RefreshPickups(){
 	for( i=0; i < tmpList.Length; i++ ){
 		tmpList[i].TurnOff();
 	}
+	// clear the work list
+	tmpList.Length = 0;
 	// then pick Spawners to spawn new random items
 	if( !Game.bTradingDoorsOpen && ( Game.NumMonsters > Settings.GetMinMonsters() || Game.TotalMaxMonsters > 0 ) ){
 		chance = Settings.GetSpawnChance();
