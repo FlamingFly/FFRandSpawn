@@ -18,7 +18,7 @@ set POSTBUILD=TRUE
 :: ===== Script =====
 
 :: normalize postbuild variable
-if not %POSTBUILD% == TRUE set POSTBUILD=FALSE
+if not _%POSTBUILD%_ == _TRUE_ set POSTBUILD=FALSE
 
 :: write out settings
 echo.

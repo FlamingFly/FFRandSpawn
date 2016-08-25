@@ -38,10 +38,9 @@ public function bool CheckReplacement(Actor Other, out byte bSuperRelevant){
 		// Log("DEBUG: Checking random item spawn", self.class.name);
 		if( Other.class == class'FFRandItemSpawn' ){
 			// Log("DEBUG: FFRandItemSpawn OK", self.class.name);
-			FFRandItemSpawn(Other).Setup(Settings, Game, self);
+			FFRandItemSpawn(Other).Setup(Settings, self);
 			// Log("DEBUG: Adding spawner to lists", self.class.name);
 			AddSpawnerToList( FFRandItemSpawn(Other), AllSpawners );
-			AddSpawnerToList( FFRandItemSpawn(Other), ReadySpawners );
 			return true;
 		} else if( Other.class == class'FFRandFakeItemSpawn' ){
 			// Log("DEBUG: FFRandFakeItemSpawn OK", self.class.name);
@@ -158,8 +157,8 @@ public function NotifyOnPickupSpawned( FFRandItemSpawn Spawner ){
 	AddSpawnerToList( Spawner, ActiveSpawners );
 }
 
-public function NotifyOnCooldownEnd( FFRandItemSpawn Spawner ){
-	// Log("DEBUG: NotifyOnCooldownEnd()", self.class.name);
+public function NotifyOnReady( FFRandItemSpawn Spawner ){
+	// Log("DEBUG: NotifyOnReady()", self.class.name);
 	RemoveSpawnerFromList( Spawner, CoolingSpawners );
 	AddSpawnerToList( Spawner, ReadySpawners );
 }

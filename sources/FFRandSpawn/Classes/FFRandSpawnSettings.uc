@@ -5,7 +5,7 @@ class FFRandSpawnSettings extends Object
 
 // configurables
 var() private config array<string> SpawnItem;
-var() private config float PickupCooldown, PickupSpawnInterval, EnsurePickupRatio, EnsureAmmoRatio,
+var() private config float PickupCooldown, PickupSpawnInterval, EnsurePickupRatio, EnsureAmmoRatio, MaxRandRange,
 		DespawnChanceRatio, SpawnChanceBeg, SpawnChanceNorm, SpawnChanceHard, SpawnChanceSui, SpawnChanceHoe;
 var() private config int AmmoWeight, MinMonsters;
 var() private config bool bScaleEnsure;
@@ -61,6 +61,7 @@ private function InitList(){
 	ValidateRange(EnsurePickupRatio, 0.0, 1.0, "EnsurePickupRatio" );
 	ValidateRange(EnsureAmmoRatio, 0.0, 1.0, "EnsureAmmoRatio" );
 	ValidateRange(DespawnChanceRatio, 0.0, 0.999999, "DespawnChanceRatio" );
+	ValidateRange(MaxRandRange, 0.0, 5000.0, "MaxRandRange" );
 	// validate spawn chances
 	ValidateRange(SpawnChanceBeg, 0.0, 1.0, "SpawnChanceBeg" );
 	ValidateRange(SpawnChanceNorm, 0.0, 1.0, "SpawnChanceNorm" );
@@ -201,8 +202,13 @@ public function float GetEnsurePickup(){
 public function float GetEnsureAmmo(){
 	return EnsureAmmo;
 }
+
 public function int GetMinMonsters(){
 	return MinMonsters;
+}
+
+public function float GetMaxRandRange(){
+	return MaxRandRange;
 }
 
 defaultproperties
@@ -213,6 +219,7 @@ defaultproperties
 	EnsurePickupRatio=0.0
 	EnsureAmmoRatio=0.0
 	bScaleEnsure=True
+	MaxRandRange=50
 	DespawnChanceRatio=0.5
 	MinMonsters=5
 	TurnOffRetryDelay=1.0

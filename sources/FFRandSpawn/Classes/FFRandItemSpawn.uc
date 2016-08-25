@@ -2,23 +2,23 @@ class FFRandItemSpawn extends KFRandomItemSpawn;
 
 var private FFRandSpawnSettings Settings;
 var private FFRandSpawnMut myMut;
-var private bool bDelayedOff, bTurningOff;
+var private bool bDelayedOff, bTurningOff, bWaitForSettings;
 var private float RandomPosRange, TurnOffRetryTime, CooldownEndTime;
-var private KFGameType Game;
 var private int MaxSpawnRetry;
 
 
 simulated public event PostBeginPlay(){
-	local int i;
+	// local int i;
 	// Log("DEBUG: PostBeginPlay()", self.class.name);
 	// for timeimg checks
 	bTurningOff = false;
+	bWaitForSettings = true;
 	SetTimer(1, true);
-	if ( Level.NetMode != NM_DedicatedServer ) {
-		for ( i=0; i< Settings.GetClassCount(); i++ ){
-			Settings.GetClass(i).static.StaticPrecache(Level);
-		}
-	}
+	// if ( Level.NetMode != NM_DedicatedServer ) {
+		// for ( i=0; i< Settings.GetClassCount(); i++ ){
+			// Settings.GetClass(i).static.StaticPrecache(Level);
+		// }
+	// }
 }
 
 public function bool IsAmmo(){
@@ -107,7 +107,7 @@ private function SpawnItem( class<Pickup> itemClass, bool force ){
 	}
 	if(myPickup == none){
 		// try to spawn at the random location and halve it if failed until spawned or ran out of attempts
-		for( i=0; ( myPickup == none && i < MaxSpawnRetry ); i++){
+		for( i=0; ( myPickup == none && i < MaxSpawnRetry && VSize(rndPos) < 1.0 ); i++){
 			myPickUp = Spawn( itemClass, self,, (self.Location + rndPos + (vect(0,0,1) * SpawnHeight)), rndRot);
 			rndPos = rndPos * 0.5;
 		}
@@ -141,14 +141,18 @@ public function Timer(){
 	}
 	if( CooldownEndTime > -1 && Level.TimeSeconds >= CooldownEndTime ){
 		CooldownEndTime = -1;
-		myMut.NotifyOnCooldownEnd( self );
+		myMut.NotifyOnReady( self );
+	}
+	if( bWaitForSettings && Settings.IsReady() ){
+		myMut.NotifyOnReady( self );
+		bWaitForSettings = false;
+		RandomPosRange = Settings.GetMaxRandRange();
 	}
 }
 
-public function Setup(FFRandSpawnSettings S, KFGameType G, FFRandSpawnMut M){
+public function Setup(FFRandSpawnSettings S, FFRandSpawnMut M){
 	Settings = S;
 	myMut = M;
-	Game = G;
 }
 
 public function EnableMe(){}
@@ -163,7 +167,7 @@ defaultproperties
 {
 	CooldownEndTime=-1
 	SpawnHeight=50.0
-	RandomPosRange=250.0
+	RandomPosRange=50.0
 	MaxSpawnRetry=10
 	bIsEnabledNow=True
 }
